@@ -21,6 +21,8 @@ public class Socket {
     private MessageReader messageReader;
     private MessageWriter messageWriter;
 
+    private boolean closed;
+
 
     public Socket() {
 
@@ -43,7 +45,11 @@ public class Socket {
         int totalBytesRead = 0;
         int bytesRead = 0;
         while ((bytesRead = this.socketChannel.read(byteBuffer)) > 0) {
+
             totalBytesRead += bytesRead;
+        }
+        if (bytesRead == -1) {
+            closed = true;
         }
         return totalBytesRead;
     }

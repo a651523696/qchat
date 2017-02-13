@@ -25,7 +25,6 @@ public class SocketProcessor implements Runnable{
     private Queue<Socket> inboundSockets;
     private Queue<Message> outboundMessages;
     private MessageBuffer messageBuffer;
-    private WriterProxy writerProxy;
     private Selector writeSelector;
     private Selector readSelector;
     private Set<Socket> emptySockets = new HashSet<>();
@@ -36,7 +35,6 @@ public class SocketProcessor implements Runnable{
         this.inboundSockets = inboundSockets;
         this.outboundMessages = outboundMessages;
         this.messageBuffer = messageBuffer;
-//        this.writerProxy = new WriterProxy(messageBuffer, outboundMessages);
         this.writeSelector = Selector.open();
         this.readSelector = Selector.open();
         this.socketMap = new HashMap<>();
@@ -139,7 +137,7 @@ public class SocketProcessor implements Runnable{
                 }
             }
         }catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -152,6 +150,12 @@ public class SocketProcessor implements Runnable{
         for (Message message : fullMessages) {
             //todo attach message with current socket's socketId
             this.messageProcessorChain.doProcess(message);
+        }
+        //if a chanel is closed，cancel the read event，and remove in-connection sockets map;
+        if (socket.isClosed()) {
+            socketMap.values().remove(socket);
+            key.cancel();
+            socket.getSocketChannel().close();
         }
         fullMessages.clear();
     }

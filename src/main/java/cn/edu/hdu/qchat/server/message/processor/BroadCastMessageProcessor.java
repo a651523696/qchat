@@ -11,6 +11,9 @@ import java.util.Collection;
  * @create 2017-02-10-下午4:45
  */
 
+/**
+ * a message processor which broadcasst message to all connected sockets
+ */
 public class BroadCastMessageProcessor implements IMessageProcessor {
 
     private SocketProcessor socketProcessor;
@@ -24,7 +27,6 @@ public class BroadCastMessageProcessor implements IMessageProcessor {
         Collection<Socket> connectedSockets = socketProcessor.getSocketMap().values();
         connectedSockets.stream().forEach(socket -> {
             socket.getMessageWriter().enqueue(message);
-
             socketProcessor.removeFromEmptySockets(socket);
             socketProcessor.addToNonEmptySockets(socket);
         });
